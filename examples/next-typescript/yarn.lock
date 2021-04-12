@@ -39,10 +39,10 @@
     lodash "^4.17.13"
     to-fast-properties "^2.0.0"
 
-"@fungi-realtime/node@^0.2.2":
-  version "0.2.2"
-  resolved "https://registry.yarnpkg.com/@fungi-realtime/node/-/node-0.2.2.tgz#bb0d004e36dd876c0606e8f815c6a914cc03d070"
-  integrity sha512-n257O57DberN5xxlQs4yNSCbU1WrHz1ic01tlRcqfJ7F9fHlW3SL+03b94J/Ta63b6cQ7eM6L0HWzqjOhX8ZhQ==
+"@fungi-realtime/node@^0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@fungi-realtime/node/-/node-0.3.0.tgz#d136adb06265b91d43721f282dd5cbeb04f408fb"
+  integrity sha512-IPB/2e1cRyzabAg8N6HvYUwleFQRrx6Hi7kX/DvxoFEnrc1fjQWWJF+gYjPODT3xtoNWGSAPQHfGZLw8TKAmHg==
   dependencies:
     abort-controller "^3.0.0"
     node-fetch "^2.6.1"
