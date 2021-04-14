@@ -18,7 +18,7 @@ import {
 
 export class Client {
   private ws: ReconnectingWebSocket;
-  private pingInterval!: NodeJS.Timeout;
+  private pingInterval!: number;
   private channels: Channel[];
   public socketId!: string;
   public isConnectionEstablished: boolean;
@@ -64,6 +64,8 @@ export class Client {
 
   private addMessageEventListener() {
     this.ws.addEventListener('message', rawMessage => {
+      console.log(rawMessage);
+
       if (this.isPong(rawMessage)) {
         // Ignore the message if it's a pong for one of our
         // pings.
@@ -204,7 +206,7 @@ export class Client {
 
     const keepAliveLatency = this.config.keepAliveLatency ?? DEFAULT_KA_LATENCY;
 
-    this.pingInterval = setInterval(() => {
+    this.pingInterval = window.setInterval(() => {
       this.ws.send(ClientEvents.PING);
     }, (data.activity_timeout - keepAliveLatency) * 1000);
 
