@@ -47,6 +47,7 @@ export class Client {
   private addEventListeners() {
     this.addOpenEventListener();
     this.addErrorEventListener();
+    this.addCloseEventListener();
   }
 
   private addOpenEventListener() {
@@ -64,8 +65,6 @@ export class Client {
 
   private addMessageEventListener() {
     this.ws.addEventListener('message', rawMessage => {
-      console.log(rawMessage);
-
       if (this.isPong(rawMessage)) {
         // Ignore the message if it's a pong for one of our
         // pings.
@@ -215,6 +214,7 @@ export class Client {
 
   private addCloseEventListener() {
     this.ws.addEventListener('close', event => {
+      console.log('hi');
       if (this.pingInterval) {
         clearInterval(this.pingInterval);
       }
