@@ -1,4 +1,4 @@
-import { fetchWithTimeout } from "./fetchWithTimeout";
+import { fetchWithTimeout } from './fetchWithTimeout';
 
 export async function json<TReceivedJSON>(
   data: any,
@@ -6,12 +6,12 @@ export async function json<TReceivedJSON>(
   headers: HeadersInit = {}
 ) {
   const response = await fetchWithTimeout(input, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       ...headers,
     },
-    credentials: "include",
+    credentials: 'include',
     body: JSON.stringify(data),
   });
 
