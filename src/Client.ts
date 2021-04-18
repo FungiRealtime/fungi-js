@@ -36,9 +36,10 @@ export class Client {
     this.isConnectionEstablished = false;
     this.channels = [];
 
-    this.ws = new ReconnectingWebSocket(config.wsEndpoint, [], {
+    this.ws = new ReconnectingWebSocket(config.endpoint, [], {
       connectionTimeout: CONNECTION_TIMEOUT,
       WebSocket,
+      debug: true,
     });
 
     this.addEventListeners();
@@ -52,6 +53,8 @@ export class Client {
 
   private addOpenEventListener() {
     this.ws.addEventListener('open', () => {
+      console.log('open');
+
       this.addMessageEventListener();
       this.addCloseEventListener();
     });

@@ -5,31 +5,18 @@ export interface ClientConfig {
    * The endpoint at which the Fungi ws server is available.
    * ```
    * const fungi = new Fungi({
-   *   wsEndpoint: 'ws://your-app.com',
-   *   httpEndpoint: 'https://your-app.com'
+   *   endpoint: 'ws://your-app.com',
    * })
    * ```
    */
-  wsEndpoint: string;
-
-  /**
-   * The endpoint at which the Fungi http server is available.
-   * ```
-   * const fungi = new Fungi({
-   *   wsEndpoint: 'ws://your-app.com',
-   *   httpEndpoint: 'https://your-app.com'
-   * })
-   * ```
-   */
-  httpEndpoint: string;
+  endpoint: string;
 
   /**
    * An auth endpoint must be provided if the application subscribes to
    * channels that require authentication (i.e., private channels).
    * ```
    * const fungi = new Fungi({
-   *   wsEndpoint: 'ws://your-app.com',
-   *   httpEndpoint: 'https://your-app.com',
+   *   endpoint: 'ws://your-app.com',
    *   auth: {
    *     endpoint: '/api/fungi/auth',
    *     headers: {
