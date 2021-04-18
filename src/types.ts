@@ -51,6 +51,12 @@ export interface ClientConfig {
    * is closed.
    */
   onClose?: (event: CloseEvent) => void;
+
+  /**
+   * Callback which will be called when the websocket's connection
+   * is closed.
+   */
+  onConnectionEstablished?: () => void;
 }
 
 export interface AuthResponse {

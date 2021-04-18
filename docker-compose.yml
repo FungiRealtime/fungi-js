@@ -1,21 +1,11 @@
-version: "3.8"
+version: '3.8'
 
 services:
-  fungi-http:
-    image: fungirealtime/http-api
-    ports:
-      - 8080:8080
-    environment: 
-      REDIS_URL: redis://:myredispassword@redis:6379/
-      APP_ID: app-test-id
-      APP_SECRET: app-test-secret
-      APP_KEY: app-test-key
-    
   fungi-ws:
     image: fungirealtime/ws-api
     ports:
       - 8081:8080
-    environment: 
+    environment:
       REDIS_URL: redis://:myredispassword@redis:6379/
       APP_ID: app-test-id
       APP_SECRET: app-test-secret

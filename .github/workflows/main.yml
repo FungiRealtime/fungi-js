@@ -25,6 +25,9 @@ jobs:
       - name: Lint
         run: yarn lint
 
+      - name: Start containers
+        run: docker-compose up -d
+
       - name: Test
         run: yarn test --ci --coverage --maxWorkers=2
 

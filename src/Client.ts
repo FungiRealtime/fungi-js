@@ -18,9 +18,9 @@ import {
 
 export class Client {
   private ws: ReconnectingWebSocket;
-  private pingInterval!: number;
+  private pingInterval: number | null = null;
   private channels: Channel[];
-  public socketId!: string;
+  public socketId: string | null = null;
   public isConnectionEstablished: boolean;
 
   constructor(public config: ClientConfig) {
@@ -39,7 +39,6 @@ export class Client {
     this.ws = new ReconnectingWebSocket(config.endpoint, [], {
       connectionTimeout: CONNECTION_TIMEOUT,
       WebSocket,
-      debug: true,
     });
 
     this.addEventListeners();
@@ -53,8 +52,6 @@ export class Client {
 
   private addOpenEventListener() {
     this.ws.addEventListener('open', () => {
-      console.log('open');
-
       this.addMessageEventListener();
       this.addCloseEventListener();
     });
@@ -84,6 +81,7 @@ export class Client {
       switch (message.event) {
         case ServerEvents.CONNECTION_ESTABLISHED: {
           this.handleConnectionEstablishedEvent(message);
+          this.config.onConnectionEstablished?.();
           break;
         }
 
@@ -217,7 +215,10 @@ export class Client {
 
   private addCloseEventListener() {
     this.ws.addEventListener('close', event => {
-      console.log('hi');
+      this.isConnectionEstablished = false;
+      this.socketId = null;
+      this.channels = [];
+
       if (this.pingInterval) {
         clearInterval(this.pingInterval);
       }
@@ -271,5 +272,9 @@ export class Client {
     }
 
     channel.unsubscribe();
+  }
+
+  public disconnect() {
+    this.ws.close();
   }
 }
