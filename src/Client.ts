@@ -81,7 +81,7 @@ export class Client {
       switch (message.event) {
         case ServerEvents.CONNECTION_ESTABLISHED: {
           this.handleConnectionEstablishedEvent(message);
-          this.config.onConnectionEstablished?.();
+
           break;
         }
 
@@ -211,6 +211,8 @@ export class Client {
     }, (data.activity_timeout - keepAliveLatency) * 1000);
 
     this.channels.forEach(channel => channel.subscribe());
+
+    this.config.onConnectionEstablished?.();
   }
 
   private addCloseEventListener() {

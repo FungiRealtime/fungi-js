@@ -78,19 +78,19 @@ export class Channel {
    */
   public trigger(eventName: string, data: Record<string, unknown>) {
     if (!this.isSubscribed) {
-      return console.error(
+      throw new Error(
         `Failed to trigger client event with an event name of ${eventName} on channel ${this.name}. Client events can only be triggered after a subscription has been successfully registered.`
       );
     }
 
     if (!this.isPrivateChannel()) {
-      return console.error(
+      throw new Error(
         `Failed to trigger client event with an event name of ${eventName} on channel ${this.name}. Client events can only be triggered on authenticated channels.`
       );
     }
 
     if (!eventName.startsWith('client-')) {
-      return console.error(
+      throw new Error(
         `Failed to trigger client event with an event name of ${eventName} on channel ${this.name}. The event name for client events must be prefixed with 'client-'.`
       );
     }

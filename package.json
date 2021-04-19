@@ -49,6 +49,7 @@
     }
   ],
   "devDependencies": {
+    "@fungi-realtime/node": "^0.3.0",
     "@size-limit/preset-small-lib": "^4.10.2",
     "@types/ws": "^7.4.1",
     "husky": "^6.0.0",
