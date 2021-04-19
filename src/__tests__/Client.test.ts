@@ -338,5 +338,58 @@ it('allows unbinding events', async () => {
   client.disconnect();
 });
 
-it.todo('allows binding all events');
-it.todo('allows unbinding all events');
+it('allows global binding and unbinding', async () => {
+  let eventsReceivedCount = 0;
+
+  const client = await connect(
+    new Client({
+      endpoint: 'ws://localhost:8081',
+      auth: {
+        endpoint: TEST_BASE_URL + '/authorize_socket',
+      },
+    })
+  );
+
+  server.listen();
+
+  const channel = client.subscribe('test-channel');
+
+  await new Promise(res =>
+    channel.bind(ServerEvents.SUBSCRIPTION_SUCCEEDED, () => {
+      res(undefined);
+    })
+  );
+
+  channel.bindGlobal(() => {
+    eventsReceivedCount++;
+  });
+
+  const batchCount = 10;
+
+  await json(
+    {
+      channel_name: 'test-channel',
+      amount: batchCount,
+    },
+    TEST_BASE_URL + '/trigger_batch'
+  );
+
+  expect(eventsReceivedCount).toBe(batchCount);
+
+  channel.unbindGlobal();
+
+  await json(
+    {
+      channel_names: ['test-channel'],
+      event_name: 'test-event',
+    },
+    TEST_BASE_URL + '/trigger'
+  );
+
+  // Since we unbound globally the events received count
+  // should be the same even though we just triggered an event.
+  expect(eventsReceivedCount).toBe(batchCount);
+
+  server.close();
+  client.disconnect();
+});

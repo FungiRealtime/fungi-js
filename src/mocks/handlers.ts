@@ -48,4 +48,21 @@ export const handlers = [
       return res(ctx.json({ ok: true }), ctx.status(200));
     }
   ),
+
+  rest.post<{ channel_name: string; amount: number }>(
+    TEST_BASE_URL + '/trigger_batch',
+    async (req, res, ctx) => {
+      const events = new Array(req.body.amount).fill(0).map((_, index) => {
+        return {
+          channel: req.body.channel_name,
+          event: `test-event-${index}`,
+          data: { test: true },
+        };
+      });
+
+      await client.triggerBatch(events);
+
+      return res(ctx.json({ ok: true }), ctx.status(200));
+    }
+  ),
 ];
