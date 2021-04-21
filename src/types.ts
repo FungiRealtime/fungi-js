@@ -124,7 +124,8 @@ export interface FungiUnsubscriptionSucceeded {
 export interface FungiSubscriptionError {
   event: ServerEvents.SUBSCRIPTION_ERROR;
   data: {
-    channel: string; // The name of the channel
+    channel: string; // The name of the channelr
+    reason: string;
   };
 }
 
