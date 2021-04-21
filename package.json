@@ -38,6 +38,10 @@
   "name": "@fungi-realtime/core",
   "author": "Gabriel",
   "module": "dist/core.esm.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/FungiRealtime/fungi-js.git"
+  },
   "size-limit": [
     {
       "path": "dist/core.cjs.production.min.js",
