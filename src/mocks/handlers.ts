@@ -4,7 +4,7 @@ import { Client } from '@fungi-realtime/node';
 export const TEST_BASE_URL = 'http://localhost:9999';
 
 const client = new Client({
-  httpEndpoint: 'http://localhost:8080',
+  httpEndpoint: 'http://localhost:8081',
   key: 'app-test-key',
   secret: 'app-test-secret',
 });

@@ -29,4 +29,4 @@ npm install @fungi-realtime/core
 
 ## Usage & Docs
 
-See the [official documentation](https://fungirealti.me/docs/js).
+See the [official documentation](https://fungirealti.me/docs/03-javascript/01-overview).

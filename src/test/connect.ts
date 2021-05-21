@@ -14,8 +14,7 @@ export async function connect(existingClient?: Client) {
   let client: Client;
 
   await new Promise(res => {
-    client = new Client({
-      endpoint: 'ws://localhost:8081',
+    client = new Client('ws://localhost:8081', {
       onConnectionEstablished: () => {
         res(undefined);
       },

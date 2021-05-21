@@ -23,10 +23,10 @@ export class Client {
   public socketId: string | null = null;
   public isConnectionEstablished: boolean;
 
-  constructor(public config: ClientConfig) {
+  constructor(address: string, public config?: ClientConfig) {
     if (
-      config.keepAliveLatency &&
-      (config.keepAliveLatency < 5 || config.keepAliveLatency > 30)
+      config?.keepAliveLatency &&
+      (config?.keepAliveLatency < 5 || config?.keepAliveLatency > 30)
     ) {
       throw new Error(
         `The keep alive latency must be between 5 and 30 (inclusive). You provided a value of ${config.keepAliveLatency}.`
@@ -36,7 +36,7 @@ export class Client {
     this.isConnectionEstablished = false;
     this.channels = [];
 
-    this.ws = new ReconnectingWebSocket(config.endpoint, [], {
+    this.ws = new ReconnectingWebSocket(address, [], {
       connectionTimeout: CONNECTION_TIMEOUT,
       WebSocket,
     });
@@ -157,7 +157,7 @@ export class Client {
 
   private handleErrorEvent(message: ServerEvent) {
     const { data } = message as FungiError;
-    this.config.onError?.(data.message, data.code);
+    this.config?.onError?.(data.message, data.code);
   }
 
   private handleSubscriptionErrorEvent(message: ServerEvent) {
@@ -204,7 +204,8 @@ export class Client {
     const { data } = message as FungiConnectionEstablished;
     this.socketId = data.socket_id;
 
-    const keepAliveLatency = this.config.keepAliveLatency ?? DEFAULT_KA_LATENCY;
+    const keepAliveLatency =
+      this.config?.keepAliveLatency ?? DEFAULT_KA_LATENCY;
 
     this.pingInterval = window.setInterval(() => {
       this.ws.send(ClientEvents.PING);
@@ -212,7 +213,7 @@ export class Client {
 
     this.channels.forEach(channel => channel.subscribe());
 
-    this.config.onConnectionEstablished?.();
+    this.config?.onConnectionEstablished?.();
   }
 
   private addCloseEventListener() {
@@ -225,7 +226,7 @@ export class Client {
         clearInterval(this.pingInterval);
       }
 
-      this.config.onClose?.(event);
+      this.config?.onClose?.(event);
     });
   }
 
