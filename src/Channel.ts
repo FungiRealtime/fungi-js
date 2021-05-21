@@ -154,7 +154,7 @@ export class Channel {
   }
 
   private async authorize(channelName: string) {
-    if (!this.client.config.auth?.endpoint) {
+    if (!this.client.config?.auth?.endpoint) {
       throw new Error(
         `An auth endpoint must be provided to subscribe to private channels.`
       );
