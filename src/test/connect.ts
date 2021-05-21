@@ -3,17 +3,12 @@ import { Client } from '../Client';
 export async function connect(existingClient?: Client) {
   if (existingClient) {
     await new Promise(res => {
-      if (existingClient.config) {
-        existingClient.config.onConnectionEstablished = () => {
+      existingClient.config = {
+        ...(existingClient.config || {}),
+        onConnectionEstablished: () => {
           res(undefined);
-        };
-      } else {
-        existingClient.config = {
-          onConnectionEstablished: () => {
-            res(undefined);
-          },
-        };
-      }
+        },
+      };
     });
 
     return existingClient;

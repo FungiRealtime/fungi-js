@@ -73,7 +73,13 @@ it('queues subscriptions if client subscribes before connection is established',
 });
 
 it('subscribes and unsubscribes to private channels', async () => {
-  const client = await connect(new Client('ws://localhost:8081'));
+  const client = await connect(
+    new Client('ws://localhost:8081', {
+      auth: {
+        endpoint: TEST_BASE_URL + '/authorize_socket',
+      },
+    })
+  );
 
   server.listen();
 
@@ -101,30 +107,14 @@ it('subscribes and unsubscribes to private channels', async () => {
   client.disconnect();
 });
 
-it('requires valid authentication to subscribe to private channels', async () => {
-  const client = await connect(new Client('ws://localhost:8081'));
-
-  server.listen();
-
-  const channel = client.subscribe('private-channel');
-
-  await new Promise((res, rej) => {
-    channel.bind(ServerEvents.SUBSCRIPTION_ERROR, () => {
-      res(undefined);
-    });
-    channel.bind(ServerEvents.SUBSCRIPTION_SUCCEEDED, () => {
-      rej();
-    });
-  });
-
-  expect(channel.isSubscribed).toBe(false);
-
-  server.close();
-  client.disconnect();
-});
-
 it('allows client events on private channels', async () => {
-  const client = await connect(new Client('ws://localhost:8081'));
+  const client = await connect(
+    new Client('ws://localhost:8081', {
+      auth: {
+        endpoint: TEST_BASE_URL + '/authorize_socket',
+      },
+    })
+  );
 
   server.listen();
 
@@ -184,7 +174,13 @@ it(`doesn't allow client events on public channels`, async () => {
 it('allows binding events', async () => {
   expect.assertions(2);
 
-  const client = await connect(new Client('ws://localhost:8081'));
+  const client = await connect(
+    new Client('ws://localhost:8081', {
+      auth: {
+        endpoint: TEST_BASE_URL + '/authorize_socket',
+      },
+    })
+  );
 
   server.listen();
 
