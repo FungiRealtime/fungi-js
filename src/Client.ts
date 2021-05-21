@@ -18,7 +18,7 @@ import {
 
 export class Client {
   private ws: ReconnectingWebSocket;
-  private pingInterval: number | null = null;
+  private pingInterval: any = null;
   private channels: Channel[];
   public socketId: string | null = null;
   public isConnectionEstablished: boolean;
@@ -207,7 +207,7 @@ export class Client {
     const keepAliveLatency =
       this.config?.keepAliveLatency ?? DEFAULT_KA_LATENCY;
 
-    this.pingInterval = window.setInterval(() => {
+    this.pingInterval = setInterval(() => {
       this.ws.send(ClientEvents.PING);
     }, (data.activity_timeout - keepAliveLatency) * 1000);
 
