@@ -1,4 +1,4 @@
-import { Client } from '../Client';
+import { FungiClient } from '../FungiClient';
 import { TEST_BASE_URL } from '../mocks/handlers';
 import { server } from '../mocks/server';
 import { connect } from '../test/connect';

@@ -1,3 +1,3 @@
-export * from './Client';
+export * from './FungiClient';
 export * from './Channel';
 export * from './types';

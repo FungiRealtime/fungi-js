@@ -1,4 +1,4 @@
-import { Client } from './Client';
+import { FungiClient } from './FungiClient';
 import { json } from './utils/json';
 import {
   AuthResponse,

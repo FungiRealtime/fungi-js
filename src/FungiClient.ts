@@ -13,17 +13,17 @@ import {
   ServerEvent,
   ServerEvents,
   TriggeredEvent,
-  ClientConfig,
+  FungiClientConfig,
 } from './types';
 
-export class Client {
+export class FungiClient {
   private ws: ReconnectingWebSocket | null = null;
   private pingInterval: any = null;
   private channels: Channel[] = [];
   public socketId: string | null = null;
   public isConnectionEstablished: boolean = false;
 
-  constructor(address: string, public config?: ClientConfig) {
+  constructor(address: string, public config?: FungiClientConfig) {
     if (
       (config?.clientOnly && typeof window !== 'undefined') ||
       !config?.clientOnly

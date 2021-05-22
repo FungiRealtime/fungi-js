@@ -1,4 +1,4 @@
-import { Client } from '../Client';
+import { FungiClient } from '../FungiClient';
 
 export async function connect(existingClient?: Client) {
   if (existingClient) {

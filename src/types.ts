@@ -1,11 +1,11 @@
 import { CloseEvent } from 'reconnecting-websocket';
 
-export interface ClientConfig {
+export interface FungiClientConfig {
   /**
    * An auth endpoint must be provided if the application subscribes to
    * channels that require authentication (i.e., private channels).
    * ```
-   * const fungi = new Fungi('wss://your-app.com', {
+   * const fungi = new FungiClient('wss://your-app.com', {
    *   auth: {
    *     endpoint: '/api/fungi/auth',
    *     headers: {
