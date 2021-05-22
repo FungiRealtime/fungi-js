@@ -46,6 +46,12 @@ export interface ClientConfig {
    * is closed.
    */
   onConnectionEstablished?: () => void;
+
+  /**
+   * If true, the websocket connection will only be open
+   * client-side (if `window` is defined).
+   */
+  clientOnly?: boolean;
 }
 
 export interface AuthResponse {

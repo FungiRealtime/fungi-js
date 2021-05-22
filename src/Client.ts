@@ -17,11 +17,11 @@ import {
 } from './types';
 
 export class Client {
-  private ws: ReconnectingWebSocket;
+  private ws: ReconnectingWebSocket | null = null;
   private pingInterval: any = null;
-  private channels: Channel[];
+  private channels: Channel[] = [];
   public socketId: string | null = null;
-  public isConnectionEstablished: boolean;
+  public isConnectionEstablished: boolean = false;
 
   constructor(address: string, public config?: ClientConfig) {
     if (
@@ -33,6 +33,16 @@ export class Client {
       );
     }
 
+    if (config?.clientOnly) {
+      if (typeof window !== 'undefined') {
+        this.initialize(address);
+      }
+    } else {
+      this.initialize(address);
+    }
+  }
+
+  private initialize(address: string) {
     this.isConnectionEstablished = false;
     this.channels = [];
 
@@ -51,20 +61,20 @@ export class Client {
   }
 
   private addOpenEventListener() {
-    this.ws.addEventListener('open', () => {
+    this.ws?.addEventListener('open', () => {
       this.addMessageEventListener();
       this.addCloseEventListener();
     });
   }
 
   private addErrorEventListener() {
-    this.ws.addEventListener('error', error => {
+    this.ws?.addEventListener('error', error => {
       console.error(`Fungi ws connection failed, error: ${error.message}`);
     });
   }
 
   private addMessageEventListener() {
-    this.ws.addEventListener('message', rawMessage => {
+    this.ws?.addEventListener('message', rawMessage => {
       if (this.isPong(rawMessage)) {
         // Ignore the message if it's a pong for one of our
         // pings.
@@ -208,7 +218,7 @@ export class Client {
       this.config?.keepAliveLatency ?? DEFAULT_KA_LATENCY;
 
     this.pingInterval = setInterval(() => {
-      this.ws.send(ClientEvents.PING);
+      this.ws?.send(ClientEvents.PING);
     }, (data.activity_timeout - keepAliveLatency) * 1000);
 
     this.channels.forEach(channel => channel.subscribe());
@@ -217,7 +227,7 @@ export class Client {
   }
 
   private addCloseEventListener() {
-    this.ws.addEventListener('close', event => {
+    this.ws?.addEventListener('close', event => {
       this.isConnectionEstablished = false;
       this.socketId = null;
       this.channels = [];
@@ -240,7 +250,7 @@ export class Client {
 
   /** Sends an event. For internal use only. */
   public sendEvent(event: ClientEvent['event'], data: ClientEvent['data']) {
-    this.ws.send(JSON.stringify({ event, data }));
+    this.ws?.send(JSON.stringify({ event, data }));
   }
 
   /**
@@ -278,6 +288,6 @@ export class Client {
   }
 
   public disconnect() {
-    this.ws.close();
+    this.ws?.close();
   }
 }
