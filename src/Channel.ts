@@ -14,7 +14,7 @@ export class Channel {
   private eventHandlers: ChannelEventHandler[];
   private globalHandlers: ChannelGlobalHandler<any>[];
 
-  constructor(public name: string, private client: Client) {
+  constructor(public name: string, private client: FungiClient) {
     this.isSubscribed = false;
     this.eventHandlers = [];
     this.globalHandlers = [];

@@ -39,7 +39,7 @@ it('subscribes and unsubcribes to public channels', async () => {
 });
 
 it('queues subscriptions if client subscribes before connection is established', async () => {
-  const client = new Client('ws://localhost:8081');
+  const client = new FungiClient('ws://localhost:8081');
 
   expect(client.isConnectionEstablished).toBe(false);
 
@@ -74,7 +74,7 @@ it('queues subscriptions if client subscribes before connection is established',
 
 it('subscribes and unsubscribes to private channels', async () => {
   const client = await connect(
-    new Client('ws://localhost:8081', {
+    new FungiClient('ws://localhost:8081', {
       auth: {
         endpoint: TEST_BASE_URL + '/authorize_socket',
       },
@@ -109,7 +109,7 @@ it('subscribes and unsubscribes to private channels', async () => {
 
 it('allows client events on private channels', async () => {
   const client = await connect(
-    new Client('ws://localhost:8081', {
+    new FungiClient('ws://localhost:8081', {
       auth: {
         endpoint: TEST_BASE_URL + '/authorize_socket',
       },
@@ -147,7 +147,7 @@ it('allows client events on private channels', async () => {
 it(`doesn't allow client events on public channels`, async () => {
   expect.assertions(1);
 
-  const client = await connect(new Client('ws://localhost:8081'));
+  const client = await connect(new FungiClient('ws://localhost:8081'));
 
   server.listen();
 
@@ -163,7 +163,7 @@ it(`doesn't allow client events on public channels`, async () => {
     channel.trigger('client-test-event', { test: true });
   } catch (error) {
     expect(error.message).toBe(
-      `Failed to trigger client event with an event name of client-test-event on channel ${channel.name}. Client events can only be triggered on authenticated channels.`
+      `Failed to trigger client event with an event name of client-test-event on channel ${channel.name}. FungiClient events can only be triggered on authenticated channels.`
     );
   }
 
@@ -175,7 +175,7 @@ it('allows binding events', async () => {
   expect.assertions(2);
 
   const client = await connect(
-    new Client('ws://localhost:8081', {
+    new FungiClient('ws://localhost:8081', {
       auth: {
         endpoint: TEST_BASE_URL + '/authorize_socket',
       },
@@ -244,7 +244,7 @@ it('allows unbinding events', async () => {
 
   let eventsReceivedCount = 0;
 
-  const client = await connect(new Client('ws://localhost:8081'));
+  const client = await connect(new FungiClient('ws://localhost:8081'));
 
   server.listen();
 
@@ -293,7 +293,7 @@ it('allows unbinding events', async () => {
 it('allows global binding and unbinding', async () => {
   let eventsReceivedCount = 0;
 
-  const client = await connect(new Client('ws://localhost:8081'));
+  const client = await connect(new FungiClient('ws://localhost:8081'));
 
   server.listen();
 

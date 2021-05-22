@@ -1,6 +1,6 @@
 import { FungiClient } from '../FungiClient';
 
-export async function connect(existingClient?: Client) {
+export async function connect(existingClient?: FungiClient) {
   if (existingClient) {
     await new Promise(res => {
       existingClient.config = {
@@ -14,10 +14,10 @@ export async function connect(existingClient?: Client) {
     return existingClient;
   }
 
-  let client: Client;
+  let client: FungiClient;
 
   await new Promise(res => {
-    client = new Client('ws://localhost:8081', {
+    client = new FungiClient('ws://localhost:8081', {
       onConnectionEstablished: () => {
         res(undefined);
       },
