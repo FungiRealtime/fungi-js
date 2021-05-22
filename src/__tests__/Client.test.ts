@@ -163,7 +163,7 @@ it(`doesn't allow client events on public channels`, async () => {
     channel.trigger('client-test-event', { test: true });
   } catch (error) {
     expect(error.message).toBe(
-      `Failed to trigger client event with an event name of client-test-event on channel ${channel.name}. FungiClient events can only be triggered on authenticated channels.`
+      `Failed to trigger client event with an event name of client-test-event on channel ${channel.name}. Client events can only be triggered on authenticated channels.`
     );
   }
 
