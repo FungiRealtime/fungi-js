@@ -25,24 +25,23 @@ export class Client {
 
   constructor(address: string, public config?: ClientConfig) {
     if (
-      config?.keepAliveLatency &&
-      (config?.keepAliveLatency < 5 || config?.keepAliveLatency > 30)
+      (config?.clientOnly && typeof window !== 'undefined') ||
+      !config?.clientOnly
     ) {
-      throw new Error(
-        `The keep alive latency must be between 5 and 30 (inclusive). You provided a value of ${config.keepAliveLatency}.`
-      );
-    }
-
-    if (config?.clientOnly) {
-      if (typeof window !== 'undefined') {
-        this.initialize(address);
-      }
-    } else {
       this.initialize(address);
     }
   }
 
   private initialize(address: string) {
+    if (
+      this.config?.keepAliveLatency &&
+      (this.config.keepAliveLatency < 5 || this.config.keepAliveLatency > 30)
+    ) {
+      throw new Error(
+        `The keep alive latency must be between 5 and 30 (inclusive). You provided a value of ${this.config.keepAliveLatency}.`
+      );
+    }
+
     this.isConnectionEstablished = false;
     this.channels = [];
 
