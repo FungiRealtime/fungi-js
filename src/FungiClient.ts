@@ -52,16 +52,14 @@ export class FungiClient {
   }
 
   private addOpenEventListener() {
-    this.ws?.addEventListener('open', () => {
-      console.log(`Fungi WebSocket connection opened`);
+    this.ws?.addEventListener('open', event => {
+      this.config?.onOpen?.(event);
     });
   }
 
   private addErrorEventListener() {
     this.ws?.addEventListener('error', error => {
-      console.error(
-        `Fungi WebSocket connection error: ${JSON.stringify(error, null, 2)}`
-      );
+      this.config?.onError?.(error);
     });
   }
 
@@ -153,7 +151,7 @@ export class FungiClient {
 
   private handleErrorEvent(message: ServerEvent) {
     const { data } = message as FungiError;
-    this.config?.onError?.(data.message, data.code);
+    this.config?.onErrorEvent?.(data.message, data.code);
   }
 
   private handleSubscriptionErrorEvent(message: ServerEvent) {
@@ -211,8 +209,6 @@ export class FungiClient {
 
   private addCloseEventListener() {
     this.ws?.addEventListener('close', event => {
-      console.log(`Fungi WebSocket connection closed`);
-
       this.isConnectionEstablished = false;
       this.socketId = null;
       this.channels = [];

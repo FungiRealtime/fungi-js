@@ -1,4 +1,4 @@
-import { CloseEvent } from 'reconnecting-websocket';
+import type { Event, CloseEvent, ErrorEvent } from 'reconnecting-websocket';
 
 export interface FungiClientConfig {
   /**
@@ -21,17 +21,29 @@ export interface FungiClientConfig {
   };
 
   /**
-   * Callback which will be called when a `fungi:error` event
-   * is triggered. This won't be called for the subscription error
-   * event `fungi:subscription_error`.
+   * Callback which will be called when the websocket's connection
+   * is opened.
    */
-  onError?: (message: string, code: number) => void;
+  onOpen?: (event: Event) => void;
+
+  /**
+   * Callback which will be called when the websocket's connection
+   * errors.
+   */
+  onError?: (error: ErrorEvent) => void;
 
   /**
    * Callback which will be called when the websocket's connection
    * is closed.
    */
   onClose?: (event: CloseEvent) => void;
+
+  /**
+   * Callback which will be called when a `fungi:error` event
+   * is triggered. This won't be called for the subscription error
+   * event `fungi:subscription_error`.
+   */
+  onErrorEvent?: (message: string, code: number) => void;
 
   /**
    * Callback which will be called when the websocket's connection
