@@ -28,14 +28,6 @@ export interface FungiClientConfig {
   onError?: (message: string, code: number) => void;
 
   /**
-   * The server will disconnect the client after `120` seconds of
-   * inactivity. For this reason, pings are sent to the server every
-   * `120 - keepAliveLatency` seconds to keep the client connected.
-   * This value must be between `5` and `30` (inclusive). The default is 15.
-   */
-  keepAliveLatency?: number;
-
-  /**
    * Callback which will be called when the websocket's connection
    * is closed.
    */

@@ -33,15 +33,6 @@ export class FungiClient {
   }
 
   private initialize(address: string) {
-    if (
-      this.config?.keepAliveLatency &&
-      (this.config.keepAliveLatency < 5 || this.config.keepAliveLatency > 30)
-    ) {
-      throw new Error(
-        `The keep alive latency must be between 5 and 30 (inclusive). You provided a value of ${this.config.keepAliveLatency}.`
-      );
-    }
-
     this.isConnectionEstablished = false;
     this.channels = [];
 
