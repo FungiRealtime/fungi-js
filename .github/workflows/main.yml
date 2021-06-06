@@ -22,9 +22,6 @@ jobs:
       - name: Install deps and build (with cache)
         uses: bahmutov/npm-install@v1
 
-      - name: Lint
-        run: yarn lint
-
       - name: Start containers
         run: docker-compose up -d
 
