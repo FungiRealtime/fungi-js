@@ -1,6 +1,6 @@
 import WebSocket from 'isomorphic-ws';
 import ReconnectingWebSocket from 'reconnecting-websocket';
-import { CONNECTION_TIMEOUT, DEFAULT_KA_LATENCY } from './constants';
+import { CONNECTION_TIMEOUT, PING_SECONDS } from './constants';
 import { Channel } from './Channel';
 import {
   ClientEvent,
@@ -55,31 +55,27 @@ export class FungiClient {
 
   private addEventListeners() {
     this.addOpenEventListener();
-    this.addErrorEventListener();
+    this.addMessageEventListener();
     this.addCloseEventListener();
+    this.addErrorEventListener();
   }
 
   private addOpenEventListener() {
     this.ws?.addEventListener('open', () => {
-      this.addMessageEventListener();
-      this.addCloseEventListener();
+      console.log(`Fungi WebSocket connection opened`);
     });
   }
 
   private addErrorEventListener() {
     this.ws?.addEventListener('error', error => {
-      console.error(`Fungi ws connection failed, error: ${error.message}`);
+      console.error(
+        `Fungi WebSocket connection error: ${JSON.stringify(error, null, 2)}`
+      );
     });
   }
 
   private addMessageEventListener() {
     this.ws?.addEventListener('message', rawMessage => {
-      if (this.isPong(rawMessage)) {
-        // Ignore the message if it's a pong for one of our
-        // pings.
-        return;
-      }
-
       let message;
       try {
         message = JSON.parse(rawMessage.data) as ServerEvent;
@@ -213,12 +209,9 @@ export class FungiClient {
     const { data } = message as FungiConnectionEstablished;
     this.socketId = data.socket_id;
 
-    const keepAliveLatency =
-      this.config?.keepAliveLatency ?? DEFAULT_KA_LATENCY;
-
     this.pingInterval = setInterval(() => {
       this.ws?.send(ClientEvents.PING);
-    }, (data.activity_timeout - keepAliveLatency) * 1000);
+    }, PING_SECONDS * 1000);
 
     this.channels.forEach(channel => channel.subscribe());
 
@@ -227,6 +220,8 @@ export class FungiClient {
 
   private addCloseEventListener() {
     this.ws?.addEventListener('close', event => {
+      console.log(`Fungi WebSocket connection closed`);
+
       this.isConnectionEstablished = false;
       this.socketId = null;
       this.channels = [];
@@ -237,10 +232,6 @@ export class FungiClient {
 
       this.config?.onClose?.(event);
     });
-  }
-
-  private isPong(message: MessageEvent) {
-    return message.data === ServerEvents.PONG;
   }
 
   private getChannel(channelName: string) {
