@@ -319,3 +319,103 @@ it('allows listening to any event', async () => {
   server.close();
   client.disconnect();
 });
+
+it('removes one time listeners after they fire', async () => {
+  let eventsReceivedCount = 0;
+
+  const client = await connect(new FungiClient('ws://localhost:8080'));
+
+  server.listen();
+
+  const channel = client.subscribe('test-channel');
+
+  await new Promise(res =>
+    channel.on(ServerEvents.SUBSCRIPTION_SUCCEEDED, () => {
+      res(undefined);
+    })
+  );
+
+  channel.once('test-event', () => {
+    eventsReceivedCount++;
+  });
+
+  await json(
+    {
+      channel_names: ['test-channel', 'private-test-channel'],
+      event_name: 'test-event',
+    },
+    TEST_BASE_URL + '/trigger'
+  );
+
+  expect(eventsReceivedCount).toBe(1);
+
+  await json(
+    {
+      channel_names: ['test-channel', 'private-test-channel'],
+      event_name: 'test-event',
+    },
+    TEST_BASE_URL + '/trigger'
+  );
+
+  // We triggered again but because it's a one time
+  // listener, this should still be 1.
+  expect(eventsReceivedCount).toBe(1);
+
+  server.close();
+  client.disconnect();
+});
+
+it('client events', async () => {
+  const client1 = await connect(
+    new FungiClient('ws://localhost:8080', {
+      auth: {
+        endpoint: TEST_BASE_URL + '/authorize_socket',
+      },
+    })
+  );
+
+  const client2 = await connect(
+    new FungiClient('ws://localhost:8080', {
+      auth: {
+        endpoint: TEST_BASE_URL + '/authorize_socket',
+      },
+    })
+  );
+
+  server.listen();
+
+  const channel1 = client1.subscribe('private-test-channel');
+  const channel2 = client2.subscribe('private-test-channel');
+
+  await new Promise(res =>
+    channel1.on(ServerEvents.SUBSCRIPTION_SUCCEEDED, () => {
+      res(undefined);
+    })
+  );
+
+  await new Promise(res =>
+    channel2.on(ServerEvents.SUBSCRIPTION_SUCCEEDED, () => {
+      res(undefined);
+    })
+  );
+
+  channel1.trigger('client-test-event', {
+    test: true,
+  });
+
+  let eventData = await new Promise(res => {
+    channel2.on('client-test-event', data => {
+      res(data);
+    });
+  });
+
+  expect(eventData).toMatchInlineSnapshot(`
+    Object {
+      "test": true,
+    }
+  `);
+
+  server.close();
+  client1.disconnect();
+  client2.disconnect();
+});
