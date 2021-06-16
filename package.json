@@ -21,8 +21,7 @@
     "lint": "tsdx lint",
     "prepare": "tsdx build",
     "size": "size-limit",
-    "analyze": "size-limit --why",
-    "publish": "np"
+    "analyze": "size-limit --why"
   },
   "peerDependencies": {},
   "husky": {
