@@ -419,3 +419,22 @@ it('client events', async () => {
   client1.disconnect();
   client2.disconnect();
 });
+
+it("resets the client's state when disconnecting", async () => {
+  let client = new FungiClient('ws://localhost:8080');
+
+  await connect(client);
+
+  const channel = client.subscribe('test-channel');
+
+  await new Promise(res =>
+    channel.on(ServerEvents.SUBSCRIPTION_SUCCEEDED, () => {
+      res(undefined);
+    })
+  );
+
+  client.disconnect();
+
+  expect(client.isConnectionEstablished).toBe(false);
+  expect(client.socketId).toBeNull();
+});

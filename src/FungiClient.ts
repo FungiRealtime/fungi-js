@@ -21,12 +21,12 @@ export class FungiClient {
   public socketId: string | null = null;
   public isConnectionEstablished: boolean = false;
 
-  constructor(address: string, public config?: FungiClientConfig) {
+  constructor(private address: string, public config?: FungiClientConfig) {
     if (
       (config?.clientOnly && typeof window !== 'undefined') ||
       !config?.clientOnly
     ) {
-      this.initialize(address);
+      this.initialize(this.address);
     }
   }
 
@@ -246,7 +246,15 @@ export class FungiClient {
     channel.unsubscribe();
   }
 
+  /**
+   * Closes the WebSocket connection with Fungi and resets
+   * the client's state.
+   */
   public disconnect() {
     this.ws?.close();
+    this.ws = null;
+    this.isConnectionEstablished = false;
+    this.socketId = null;
+    this.channels = [];
   }
 }
