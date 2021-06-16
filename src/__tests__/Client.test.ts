@@ -1,6 +1,6 @@
-import { FungiClient } from '../FungiClient';
 import { TEST_BASE_URL } from '../mocks/handlers';
 import { server } from '../mocks/server';
+import { FungiClient } from '../FungiClient';
 import { connect } from '../test/connect';
 import { ServerEvents } from '../types';
 import { json } from '../utils/json';
@@ -18,7 +18,7 @@ it('subscribes and unsubcribes to public channels', async () => {
   const channel = client.subscribe('test-channel');
 
   await new Promise(res => {
-    channel.bind(ServerEvents.SUBSCRIPTION_SUCCEEDED, () => {
+    channel.on(ServerEvents.SUBSCRIPTION_SUCCEEDED, () => {
       res(undefined);
     });
   });
@@ -28,7 +28,7 @@ it('subscribes and unsubcribes to public channels', async () => {
   channel.unsubscribe();
 
   await new Promise(res => {
-    channel.bind(ServerEvents.UNSUBSCRIPTION_SUCCEEDED, () => {
+    channel.on(ServerEvents.UNSUBSCRIPTION_SUCCEEDED, () => {
       res(undefined);
     });
   });
@@ -39,7 +39,7 @@ it('subscribes and unsubcribes to public channels', async () => {
 });
 
 it('queues subscriptions if client subscribes before connection is established', async () => {
-  const client = new FungiClient('ws://localhost:8081');
+  const client = new FungiClient('ws://localhost:8080');
 
   expect(client.isConnectionEstablished).toBe(false);
 
@@ -52,18 +52,18 @@ it('queues subscriptions if client subscribes before connection is established',
 
   await connect(client);
 
-  // Bind to the subscription succeeded event after connecting
+  // Listen to the subscription succeeded event after connecting
   await Promise.all([
-    new Promise(res =>
-      channel1.bind(ServerEvents.SUBSCRIPTION_SUCCEEDED, () => {
+    new Promise(res => {
+      channel1.on(ServerEvents.SUBSCRIPTION_SUCCEEDED, () => {
         res(undefined);
-      })
-    ),
-    new Promise(res =>
-      channel2.bind(ServerEvents.SUBSCRIPTION_SUCCEEDED, () => {
+      });
+    }),
+    new Promise(res => {
+      channel2.on(ServerEvents.SUBSCRIPTION_SUCCEEDED, () => {
         res(undefined);
-      })
-    ),
+      });
+    }),
   ]);
 
   expect(channel1.isSubscribed).toBe(true);
@@ -74,7 +74,7 @@ it('queues subscriptions if client subscribes before connection is established',
 
 it('subscribes and unsubscribes to private channels', async () => {
   const client = await connect(
-    new FungiClient('ws://localhost:8081', {
+    new FungiClient('ws://localhost:8080', {
       auth: {
         endpoint: TEST_BASE_URL + '/authorize_socket',
       },
@@ -86,7 +86,7 @@ it('subscribes and unsubscribes to private channels', async () => {
   const channel = client.subscribe('private-channel');
 
   await new Promise(res => {
-    channel.bind(ServerEvents.SUBSCRIPTION_SUCCEEDED, () => {
+    channel.on(ServerEvents.SUBSCRIPTION_SUCCEEDED, () => {
       res(undefined);
     });
   });
@@ -96,7 +96,7 @@ it('subscribes and unsubscribes to private channels', async () => {
   channel.unsubscribe();
 
   await new Promise(res => {
-    channel.bind(ServerEvents.UNSUBSCRIPTION_SUCCEEDED, () => {
+    channel.on(ServerEvents.UNSUBSCRIPTION_SUCCEEDED, () => {
       res(undefined);
     });
   });
@@ -109,7 +109,7 @@ it('subscribes and unsubscribes to private channels', async () => {
 
 it('allows client events on private channels', async () => {
   const client = await connect(
-    new FungiClient('ws://localhost:8081', {
+    new FungiClient('ws://localhost:8080', {
       auth: {
         endpoint: TEST_BASE_URL + '/authorize_socket',
       },
@@ -121,24 +121,12 @@ it('allows client events on private channels', async () => {
   const channel = client.subscribe('private-channel');
 
   await new Promise(res => {
-    channel.bind(ServerEvents.SUBSCRIPTION_SUCCEEDED, () => {
+    channel.on(ServerEvents.SUBSCRIPTION_SUCCEEDED, () => {
       res(undefined);
     });
   });
 
   channel.trigger('client-test-event', { test: true });
-
-  await new Promise(res => {
-    channel.bind('client-test-event', data => {
-      expect(data).toMatchInlineSnapshot(`
-        Object {
-          "test": true,
-        }
-      `);
-
-      res(undefined);
-    });
-  });
 
   server.close();
   client.disconnect();
@@ -147,14 +135,14 @@ it('allows client events on private channels', async () => {
 it(`doesn't allow client events on public channels`, async () => {
   expect.assertions(1);
 
-  const client = await connect(new FungiClient('ws://localhost:8081'));
+  const client = await connect(new FungiClient('ws://localhost:8080'));
 
   server.listen();
 
   const channel = client.subscribe('test-channel');
 
   await new Promise(res => {
-    channel.bind(ServerEvents.SUBSCRIPTION_SUCCEEDED, () => {
+    channel.on(ServerEvents.SUBSCRIPTION_SUCCEEDED, () => {
       res(undefined);
     });
   });
@@ -171,11 +159,11 @@ it(`doesn't allow client events on public channels`, async () => {
   client.disconnect();
 });
 
-it('allows binding events', async () => {
+it('listens to events', async () => {
   expect.assertions(2);
 
   const client = await connect(
-    new FungiClient('ws://localhost:8081', {
+    new FungiClient('ws://localhost:8080', {
       auth: {
         endpoint: TEST_BASE_URL + '/authorize_socket',
       },
@@ -189,12 +177,12 @@ it('allows binding events', async () => {
 
   await Promise.all([
     new Promise(res =>
-      publicChannel.bind(ServerEvents.SUBSCRIPTION_SUCCEEDED, () => {
+      publicChannel.on(ServerEvents.SUBSCRIPTION_SUCCEEDED, () => {
         res(undefined);
       })
     ),
     new Promise(res =>
-      privateChannel.bind(ServerEvents.SUBSCRIPTION_SUCCEEDED, () => {
+      privateChannel.on(ServerEvents.SUBSCRIPTION_SUCCEEDED, () => {
         res(undefined);
       })
     ),
@@ -212,7 +200,7 @@ it('allows binding events', async () => {
 
   await Promise.all([
     new Promise(res => {
-      publicChannel.bind('test-event', data => {
+      publicChannel.on('test-event', data => {
         expect(data).toMatchInlineSnapshot(`
             Object {
               "test": true,
@@ -222,7 +210,7 @@ it('allows binding events', async () => {
       });
     }),
     new Promise(res => {
-      privateChannel.bind('test-event', data => {
+      privateChannel.on('test-event', data => {
         expect(data).toMatchInlineSnapshot(`
             Object {
               "test": true,
@@ -237,26 +225,22 @@ it('allows binding events', async () => {
   client.disconnect();
 });
 
-it('allows unbinding events', async () => {
-  const consoleWarnSpy = jest
-    .spyOn(console, 'warn')
-    .mockImplementation(() => {});
-
+it('stops listening to events', async () => {
   let eventsReceivedCount = 0;
 
-  const client = await connect(new FungiClient('ws://localhost:8081'));
+  const client = await connect(new FungiClient('ws://localhost:8080'));
 
   server.listen();
 
   const channel = client.subscribe('test-channel');
 
   await new Promise(res =>
-    channel.bind(ServerEvents.SUBSCRIPTION_SUCCEEDED, () => {
+    channel.on(ServerEvents.SUBSCRIPTION_SUCCEEDED, () => {
       res(undefined);
     })
   );
 
-  channel.bind('test-event', () => {
+  channel.on('test-event', () => {
     eventsReceivedCount++;
   });
 
@@ -270,7 +254,7 @@ it('allows unbinding events', async () => {
 
   expect(eventsReceivedCount).toBe(1);
 
-  channel.unbind('test-event');
+  channel.off('test-event');
 
   await json(
     {
@@ -280,32 +264,29 @@ it('allows unbinding events', async () => {
     TEST_BASE_URL + '/trigger'
   );
 
-  // We unbound so it should still be 1.
+  // We stopped listening so it should still be 1.
   expect(eventsReceivedCount).toBe(1);
-
-  // A warning should have been logged since we received an unbound event.
-  expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
 
   server.close();
   client.disconnect();
 });
 
-it('allows global binding and unbinding', async () => {
+it('allows listening to any event', async () => {
   let eventsReceivedCount = 0;
 
-  const client = await connect(new FungiClient('ws://localhost:8081'));
+  const client = await connect(new FungiClient('ws://localhost:8080'));
 
   server.listen();
 
   const channel = client.subscribe('test-channel');
 
   await new Promise(res =>
-    channel.bind(ServerEvents.SUBSCRIPTION_SUCCEEDED, () => {
+    channel.on(ServerEvents.SUBSCRIPTION_SUCCEEDED, () => {
       res(undefined);
     })
   );
 
-  channel.bindGlobal(() => {
+  channel.onAny(() => {
     eventsReceivedCount++;
   });
 
@@ -321,7 +302,7 @@ it('allows global binding and unbinding', async () => {
 
   expect(eventsReceivedCount).toBe(batchCount);
 
-  channel.unbindGlobal();
+  channel.offAny();
 
   await json(
     {

@@ -17,7 +17,7 @@ export async function connect(existingClient?: FungiClient) {
   let client: FungiClient;
 
   await new Promise(res => {
-    client = new FungiClient('ws://localhost:8081', {
+    client = new FungiClient('ws://localhost:8080', {
       onConnectionEstablished: () => {
         res(undefined);
       },

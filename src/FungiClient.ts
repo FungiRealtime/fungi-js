@@ -1,10 +1,9 @@
 import WebSocket from 'isomorphic-ws';
 import ReconnectingWebSocket from 'reconnecting-websocket';
-import { CONNECTION_TIMEOUT, PING_SECONDS } from './constants';
+import { CONNECTION_TIMEOUT } from './constants';
 import { Channel } from './Channel';
 import {
   ClientEvent,
-  ClientEvents,
   FungiConnectionEstablished,
   FungiError,
   FungiSubscriptionError,
@@ -18,7 +17,6 @@ import {
 
 export class FungiClient {
   private ws: ReconnectingWebSocket | null = null;
-  private pingInterval: any = null;
   private channels: Channel[] = [];
   public socketId: string | null = null;
   public isConnectionEstablished: boolean = false;
@@ -75,7 +73,6 @@ export class FungiClient {
       switch (message.event) {
         case ServerEvents.CONNECTION_ESTABLISHED: {
           this.handleConnectionEstablishedEvent(message);
-
           break;
         }
 
@@ -119,10 +116,23 @@ export class FungiClient {
     }
 
     channel.isSubscribed = false;
+    this.fireListeners(channel, event, data);
+  }
 
-    channel
-      .getEventHandlers(event)
-      .forEach(eventHandler => eventHandler.handler(data));
+  private fireListeners(
+    channel: Channel,
+    event: string,
+    data: Record<string, unknown>
+  ) {
+    const listeners = channel.getListeners(event);
+    const oneTimeListeners = channel.getOneTimeListeners(event);
+    const globalListeners = channel.getGlobalListeners();
+
+    listeners.forEach(listener => listener.callback(data));
+    oneTimeListeners.forEach(listener => listener.callback(data));
+    globalListeners.forEach(listener => listener(channel.name, event, data));
+
+    channel.removeOneTimeListeners(event);
   }
 
   private handleTriggeredEvent(message: ServerEvent) {
@@ -134,19 +144,7 @@ export class FungiClient {
       return;
     }
 
-    const eventHandlers = channel.getEventHandlers(event);
-    const globalHandlers = channel.getGlobalHandlers();
-
-    if (eventHandlers.length === 0 && globalHandlers.length === 0) {
-      console.warn(
-        `Received event '${event}' on channel '${channelName}' but no handlers are bound to it.`
-      );
-
-      return;
-    }
-
-    eventHandlers.forEach(eventHandler => eventHandler.handler(data));
-    globalHandlers.forEach(handler => handler(channelName, event, data));
+    this.fireListeners(channel, event, data);
   }
 
   private handleErrorEvent(message: ServerEvent) {
@@ -165,13 +163,7 @@ export class FungiClient {
       return;
     }
 
-    this.channels = this.channels.filter(
-      channel => channel.name === data.channel
-    );
-
-    channel
-      .getEventHandlers(event)
-      .forEach(eventHandler => eventHandler.handler(data));
+    this.fireListeners(channel, event, data);
   }
 
   private handleSubscriptionSucceededEvent(message: ServerEvent) {
@@ -187,9 +179,7 @@ export class FungiClient {
 
     channel.isSubscribed = true;
 
-    channel
-      .getEventHandlers(event)
-      .forEach(eventHandler => eventHandler.handler(data));
+    this.fireListeners(channel, event, data);
   }
 
   private handleConnectionEstablishedEvent(message: ServerEvent) {
@@ -197,10 +187,6 @@ export class FungiClient {
 
     const { data } = message as FungiConnectionEstablished;
     this.socketId = data.socket_id;
-
-    this.pingInterval = setInterval(() => {
-      this.ws?.send(ClientEvents.PING);
-    }, PING_SECONDS * 1000);
 
     this.channels.forEach(channel => channel.subscribe());
 
@@ -212,10 +198,6 @@ export class FungiClient {
       this.isConnectionEstablished = false;
       this.socketId = null;
       this.channels = [];
-
-      if (this.pingInterval) {
-        clearInterval(this.pingInterval);
-      }
 
       this.config?.onClose?.(event);
     });

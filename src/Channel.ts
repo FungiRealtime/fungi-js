@@ -2,72 +2,73 @@ import { FungiClient } from './FungiClient';
 import { json } from './utils/json';
 import {
   AuthResponse,
-  BindOptions,
-  ChannelEventHandler,
-  ChannelGlobalHandler,
-  EventBindHandler,
   ClientEvents,
+  EventListener,
+  EventListenerCallback,
+  GlobalEventListener,
 } from './types';
 
 export class Channel {
   public isSubscribed: boolean;
-  private eventHandlers: ChannelEventHandler[];
-  private globalHandlers: ChannelGlobalHandler<any>[];
+  private listeners: EventListener[];
+  private oneTimeListeners: EventListener[];
+  private globalListeners: GlobalEventListener<any>[];
 
   constructor(public name: string, private client: FungiClient) {
     this.isSubscribed = false;
-    this.eventHandlers = [];
-    this.globalHandlers = [];
+    this.listeners = [];
+    this.oneTimeListeners = [];
+    this.globalListeners = [];
   }
 
   /**
-   * Binds an event of this channel.
-   * @param event The event to bind.
-   * @param handler The handler for this binding.
-   * @param options Additional options for this binding.
+   * Adds a **one-time** listener for an event. It will be removed
+   * after being fired for the first time.
+   * @param event The name of the event.
+   * @param callback The callback which will be fired when the event is triggered.
    */
-  public bind<TData>(
-    event: string,
-    handler: EventBindHandler<TData>,
-    options?: Partial<BindOptions>
-  ) {
-    if (options?.replace) {
-      this.eventHandlers = this.eventHandlers.filter(
-        eventHandler => eventHandler.event !== event
-      );
-    }
-
-    this.eventHandlers.push({ event, handler });
+  public once<TData>(event: string, callback: EventListenerCallback<TData>) {
+    this.oneTimeListeners.push({ event, callback });
   }
 
   /**
-   * Unbinds channel's events.
-   * @param events List of events to unbind, if none are provided, all events will be unbound.
+   * Adds a listener to the end of the listeners array for an event.
+   * @param event The name of the event.
+   * @param callback The callback which will be fired when the event is triggered.
    */
-  public unbind(...events: string[]) {
+  public on<TData>(event: string, callback: EventListenerCallback<TData>) {
+    this.listeners.push({ event, callback });
+  }
+
+  /**
+   * Removes one or more listeners from the listeners array for an event.
+   * @param events The events to stop listening to, if none are provided, all
+   * events on this channel will no longer be listened to.
+   */
+  public off(...events: string[]) {
     if (events.length === 0) {
-      this.eventHandlers = [];
+      this.listeners = [];
       return;
     }
 
-    this.eventHandlers = this.eventHandlers.filter(
-      eventHandler => !events.includes(eventHandler.event)
+    this.listeners = this.listeners.filter(
+      listener => !events.includes(listener.event)
     );
   }
 
   /**
-   * Binds every event on this channel.
-   * @param handler The handler for this binding.
+   * Adds a listener that will be fired when any event is triggered.
+   * @param callback The callback which will be fired when the event is triggered.
    */
-  public bindGlobal<TData>(handler: ChannelGlobalHandler<TData>) {
-    this.globalHandlers.push(handler);
+  public onAny<TData>(callback: GlobalEventListener<TData>) {
+    this.globalListeners.push(callback);
   }
 
   /**
-   * Removes global bindings for this channel.
+   * Removes all catch-all listeners.
    */
-  public unbindGlobal() {
-    this.globalHandlers = [];
+  public offAny() {
+    this.globalListeners = [];
   }
 
   /**
@@ -137,16 +138,26 @@ export class Channel {
     });
   }
 
-  /** Gets the event handlers for a bound event. For internal use only. */
-  public getEventHandlers(event: string) {
-    return this.eventHandlers.filter(
-      eventHandler => eventHandler.event === event
+  /** Gets the listeners for an event. For internal use only. */
+  public getListeners(event: string) {
+    return this.listeners.filter(listener => listener.event === event);
+  }
+
+  /** Gets the one-time listeners for an event. For internal use only. */
+  public getOneTimeListeners(event: string) {
+    return this.oneTimeListeners.filter(listener => listener.event === event);
+  }
+
+  /** Removes the one-time listeners for an event. For internal use only. */
+  public removeOneTimeListeners(event: string) {
+    this.oneTimeListeners = this.oneTimeListeners.filter(
+      listener => listener.event !== event
     );
   }
 
-  /** Gets the global handlers. For internal use only. */
-  public getGlobalHandlers() {
-    return this.globalHandlers;
+  /** Gets the global listeners. For internal use only. */
+  public getGlobalListeners() {
+    return this.globalListeners;
   }
 
   private isPrivateChannel() {

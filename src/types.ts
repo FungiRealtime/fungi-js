@@ -62,31 +62,23 @@ export interface AuthResponse {
   auth: string;
 }
 
-export type EventBindHandler<TData> = (data: TData) => void;
+export type EventListenerCallback<TData> = (data: TData) => void;
 
-export type ChannelGlobalHandler<TData> = (
+export type GlobalEventListener<TData> = (
   channelName: string,
   event: string,
   data: TData
 ) => void;
 
-export interface ChannelEventHandler {
+export interface EventListener {
   event: string;
-  handler: EventBindHandler<any>;
-}
-
-export interface BindOptions {
-  /**
-   * Replace all bound handlers for this event by this handler.
-   */
-  replace: boolean;
+  callback: EventListenerCallback<any>;
 }
 
 export enum ClientEvents {
   SUBSCRIBE = 'fungi:subscribe',
   UNSUBSCRIBE = 'fungi:unsubscribe',
   TRIGGER = 'fungi:trigger',
-  PING = 'fungi:ping',
 }
 
 export enum ServerEvents {
@@ -95,7 +87,6 @@ export enum ServerEvents {
   SUBSCRIPTION_ERROR = 'fungi:subscription_error',
   UNSUBSCRIPTION_SUCCEEDED = 'fungi:unsubscription_succeeded',
   ERROR = 'fungi:error',
-  PONG = 'fungi:pong',
 }
 
 export interface FungiConnectionEstablished {

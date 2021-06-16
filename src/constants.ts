@@ -1,2 +1,1 @@
-export const CONNECTION_TIMEOUT = 15000; // 15 seconds
-export const PING_SECONDS = 15;
+export const CONNECTION_TIMEOUT = 10_000; // 10 seconds
